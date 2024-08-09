@@ -15,6 +15,8 @@ func NewTaskService(r domain.TaskRepository) domain.TaskService {
 }
 
 func (s TaskService) CreateTask(task *db.Task) error {
+	fmt.Println("taskservice")
+	fmt.Println(task)
 	return s.taskRepo.Create(task)
 }
 
@@ -28,17 +30,13 @@ func (s TaskService) UpdateTask(task *db.Task) error {
 
 func (s TaskService) MarkTaskDone(id int64) error {
 	task, err := s.taskRepo.GetById(id)
-
 	if err != nil {
-		return fmt.Errorf("MarkTaskDone: error getting task by id: %v", err)
+		return fmt.Errorf("MarkTaskDone: error getting task by id: %w", err)
 	}
-
 	if task == nil {
-		return fmt.Errorf("MarkTaskDone: task is nil")
+		return fmt.Errorf("MarkTaskDone: task not found")
 	}
-
 	task.Completed = true
-
 	return s.taskRepo.Update(task)
 }
 

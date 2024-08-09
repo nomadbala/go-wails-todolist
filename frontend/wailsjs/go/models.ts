@@ -6,6 +6,9 @@ export namespace db {
 	    completed: boolean;
 	    // Go type: time
 	    created_at: any;
+	    priority: string;
+	    // Go type: sql
+	    deadline: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Task(source);
@@ -17,6 +20,8 @@ export namespace db {
 	        this.title = source["title"];
 	        this.completed = source["completed"];
 	        this.created_at = this.convertValues(source["created_at"], null);
+	        this.priority = source["priority"];
+	        this.deadline = this.convertValues(source["deadline"], null);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

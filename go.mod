@@ -6,7 +6,6 @@ toolchain go1.22.4
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/wailsapp/wails/v2 v2.9.1
 )

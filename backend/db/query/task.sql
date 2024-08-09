@@ -4,11 +4,11 @@ WHERE id = $1 LIMIT 1;
 
 -- name: GetAllTasks :many
 SELECT * FROM tasks
-ORDER BY created_at ASC;
+ORDER BY priority;
 
 -- name: CreateTask :one
-INSERT INTO tasks (title, completed)
-VALUES ($1, $2)
+INSERT INTO tasks (title, completed, priority, deadline)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: DeleteTask :exec
@@ -19,6 +19,8 @@ WHERE id = $1;
 UPDATE tasks
 SET
     title = $2,
-    completed = $3
+    completed = $3,
+    priority = $4,
+    deadline = $5
 WHERE id = $1
 RETURNING *;

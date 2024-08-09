@@ -7,27 +7,37 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createTask = `-- name: CreateTask :one
-INSERT INTO tasks (title, completed)
-VALUES ($1, $2)
-RETURNING id, title, completed, created_at
+INSERT INTO tasks (title, completed, priority, deadline)
+VALUES ($1, $2, $3, $4)
+RETURNING id, title, completed, created_at, priority, deadline
 `
 
 type CreateTaskParams struct {
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	Title     string       `json:"title"`
+	Completed bool         `json:"completed"`
+	Priority  Priority     `json:"priority"`
+	Deadline  sql.NullTime `json:"deadline"`
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
-	row := q.db.QueryRowContext(ctx, createTask, arg.Title, arg.Completed)
+	row := q.db.QueryRowContext(ctx, createTask,
+		arg.Title,
+		arg.Completed,
+		arg.Priority,
+		arg.Deadline,
+	)
 	var i Task
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
 		&i.Completed,
 		&i.CreatedAt,
+		&i.Priority,
+		&i.Deadline,
 	)
 	return i, err
 }
@@ -43,8 +53,8 @@ func (q *Queries) DeleteTask(ctx context.Context, id int64) error {
 }
 
 const getAllTasks = `-- name: GetAllTasks :many
-SELECT id, title, completed, created_at FROM tasks
-ORDER BY created_at ASC
+SELECT id, title, completed, created_at, priority, deadline FROM tasks
+ORDER BY priority
 `
 
 func (q *Queries) GetAllTasks(ctx context.Context) ([]Task, error) {
@@ -61,6 +71,8 @@ func (q *Queries) GetAllTasks(ctx context.Context) ([]Task, error) {
 			&i.Title,
 			&i.Completed,
 			&i.CreatedAt,
+			&i.Priority,
+			&i.Deadline,
 		); err != nil {
 			return nil, err
 		}
@@ -76,7 +88,7 @@ func (q *Queries) GetAllTasks(ctx context.Context) ([]Task, error) {
 }
 
 const getTask = `-- name: GetTask :one
-SELECT id, title, completed, created_at FROM tasks
+SELECT id, title, completed, created_at, priority, deadline FROM tasks
 WHERE id = $1 LIMIT 1
 `
 
@@ -88,6 +100,8 @@ func (q *Queries) GetTask(ctx context.Context, id int64) (Task, error) {
 		&i.Title,
 		&i.Completed,
 		&i.CreatedAt,
+		&i.Priority,
+		&i.Deadline,
 	)
 	return i, err
 }
@@ -96,25 +110,37 @@ const updateTask = `-- name: UpdateTask :one
 UPDATE tasks
 SET
     title = $2,
-    completed = $3
+    completed = $3,
+    priority = $4,
+    deadline = $5
 WHERE id = $1
-RETURNING id, title, completed, created_at
+RETURNING id, title, completed, created_at, priority, deadline
 `
 
 type UpdateTaskParams struct {
-	ID        int64  `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+	ID        int64        `json:"id"`
+	Title     string       `json:"title"`
+	Completed bool         `json:"completed"`
+	Priority  Priority     `json:"priority"`
+	Deadline  sql.NullTime `json:"deadline"`
 }
 
 func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) (Task, error) {
-	row := q.db.QueryRowContext(ctx, updateTask, arg.ID, arg.Title, arg.Completed)
+	row := q.db.QueryRowContext(ctx, updateTask,
+		arg.ID,
+		arg.Title,
+		arg.Completed,
+		arg.Priority,
+		arg.Deadline,
+	)
 	var i Task
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
 		&i.Completed,
 		&i.CreatedAt,
+		&i.Priority,
+		&i.Deadline,
 	)
 	return i, err
 }

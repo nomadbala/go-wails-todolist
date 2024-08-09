@@ -21,6 +21,8 @@ func (r TaskRepository) Create(task *sqlcdb.Task) error {
 	params := sqlcdb.CreateTaskParams{
 		Title:     task.Title,
 		Completed: task.Completed,
+		Priority:  task.Priority,
+		Deadline:  task.Deadline,
 	}
 
 	_, err := r.queries.CreateTask(context.Background(), params)
@@ -57,6 +59,8 @@ func (r TaskRepository) Update(task *sqlcdb.Task) error {
 		ID:        task.ID,
 		Title:     task.Title,
 		Completed: task.Completed,
+		Priority:  task.Priority,
+		Deadline:  task.Deadline,
 	}
 
 	_, err := r.queries.UpdateTask(context.Background(), params)
@@ -69,5 +73,9 @@ func (r TaskRepository) Update(task *sqlcdb.Task) error {
 }
 
 func (r TaskRepository) Delete(id int64) error {
-	return r.queries.DeleteTask(context.Background(), id)
+	if err := r.queries.DeleteTask(context.Background(), id); err != nil {
+		return fmt.Errorf("failed to delete task: %w", err)
+	}
+
+	return nil
 }
